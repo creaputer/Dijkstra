@@ -3,14 +3,13 @@
 #include <queue>
 using namespace std;
 
+#define MAX_N 100000
+const int INF = 1e9;
+
 int n; // node
 int m; // road
-const int INF = 0;
 
-#define MAX_N 10000
-
-int Distance[MAX_N + 1];
-bool visited[MAX_N + 1] = { 0, };
+int d[MAX_N + 1]; // shortest distance (cost)
 vector<pair<int, int>> graph[MAX_N + 1];
 
 void dijkstra(int start) {
@@ -19,26 +18,30 @@ void dijkstra(int start) {
     
         return a.first > b.first;
     };
-    priority_queue<pair<int, int>, vector<pair<int, int>>, decltype(comp2)> q(comp2);
 
-    Distance[1] = 0;
-    q.push(make_pair(Distance[1], 1));
-    visited[1] = true;
+    priority_queue<pair<int, int>, vector<pair<int, int>>, decltype(comp2)> pq(comp2);
 
-    while (!q.empty()) {
-        pair<int, int> node = q.top();
-        visited[node.second] = true;
-        q.pop();
+    fill_n(d, MAX_N + 1, INF);
 
-        for (int i = 0; i < graph[node.second].size(); i++) {
-            pair<int, int> tNode = graph[node.second].at(i);
-            if (visited[tNode.first] != false) continue;
+    d[start] = 0;
+    pq.push({d[start], start});
 
-            int tDistance = node.first + tNode.second;
+    while (!pq.empty()) {
+        pair<int, int> node = pq.top();
+        int dist = node.first;
+        int now = node.second;
+
+        pq.pop();
+
+        if (d[now] < dist) continue;
+
+        for (int i = 0; i < graph[now].size(); i++) {
+            pair<int, int> node = graph[now].at(i);
+            int cost = dist + node.second;
             
-            if ((Distance[tNode.first] == INF) || (tDistance < Distance[tNode.first])) {
-                Distance[tNode.first] = tDistance;
-                q.push(make_pair(Distance[tNode.first], tNode.first));
+            if ((d[node.first] == INF) || (cost < d[node.first])) {
+                d[node.first] = cost;
+                pq.push({d[node.first], node.first});
             }
         }
     }
@@ -64,7 +67,7 @@ int main() {
     dijkstra(1);
 
     for (int i = 1; i <= n; i++) {
-        cout << Distance[i] << endl;
+        cout << d[i] << endl;
     }
 
     return 0;
